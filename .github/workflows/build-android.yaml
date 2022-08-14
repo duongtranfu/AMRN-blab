@@ -69,12 +69,12 @@ jobs:
 
       - name: Android Debug Build
         working-directory: ./app/android
-        run: ./gradlew bundleRelease
+        run: ./gradlew assembleDebug
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v1
         with:
-          name: app-release.apk
-          path: ./app/android/app/build/outputs/apk/release/
+          name: app-debug.apk
+          path: ./app/android/app/build/outputs/apk/debug/
 
 
