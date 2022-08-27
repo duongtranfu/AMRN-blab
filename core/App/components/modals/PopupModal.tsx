@@ -11,7 +11,8 @@ interface PopupModalProps {
   message?: string
   bodyContent?: Element
   onCallToActionPressed?: GenericFn
-  onCallToActionLabel: string
+  onClose?: GenericFn
+  onCallToActionLabel?: string
 }
 
 const PopupModal: React.FC<PopupModalProps> = ({
@@ -20,6 +21,7 @@ const PopupModal: React.FC<PopupModalProps> = ({
   description,
   message,
   onCallToActionPressed,
+  onClose,
   notificationType,
   onCallToActionLabel,
 }) => {
@@ -44,6 +46,7 @@ const PopupModal: React.FC<PopupModalProps> = ({
           bodyContent={bodyContent}
           onCallToActionLabel={onCallToActionLabel}
           onCallToActionPressed={onCallToActionPressed}
+          onClose={onClose}
         />
       </View>
     </Modal>

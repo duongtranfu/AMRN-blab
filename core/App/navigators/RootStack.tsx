@@ -1,9 +1,23 @@
 import { useAgent } from '@aries-framework/react-hooks'
+import {
+  Agent,
+  AutoAcceptCredential,
+  ConsoleLogger,
+  HttpOutboundTransport,
+  LogLevel,
+  MediatorPickupStrategy,
+  WsOutboundTransport,
+} from '@aries-framework/core'
+import { agentDependencies } from '@aries-framework/react-native'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useNavigation } from '@react-navigation/core'
 import { createStackNavigator, StackNavigationProp } from '@react-navigation/stack'
 import React, { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { AppState, View } from 'react-native'
+import { Alert, AppState, View } from 'react-native'
+import { Config } from 'react-native-config'
+import Toast from 'react-native-toast-message'
+import uuid from 'react-native-uuid'
 
 import { walletTimeout } from '../constants'
 import { useAuth } from '../contexts/auth'

@@ -90,7 +90,7 @@ const translation = {
     "EnterPIN": "Enter PIN",
     "ReenterPIN": "Confirm PIN",
     "ReenterPINTitle": "Re-Enter PIN",
-    "CreatePIN": "Create PIN",
+    "CreatePIN": "Confirm",
     "RememberPIN": "Remember your PIN.",
     "PINDisclaimer": "If you forget it, you will need to set up your wallet again and re-add your cards.",
     "Show": "Show",
