@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useNavigation } from '@react-navigation/core'
 import { StackNavigationProp } from '@react-navigation/stack'
 import React, { useState } from 'react'
@@ -7,6 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 
 import Button, { ButtonType } from '../components/buttons/Button'
 import PinInput from '../components/inputs/PinInput'
+import TextInput from '../components/inputs/TextInput'
 import AlertModal from '../components/modals/AlertModal'
 import { minPINLength } from '../constants'
 import { useAuth } from '../contexts/auth'
@@ -30,6 +32,7 @@ interface ModalState {
 const PinCreate: React.FC<PinCreateProps> = ({ setAuthenticated }) => {
   const { setPIN } = useAuth()
   const [pin, setPin] = useState('')
+  const [walletName, setWalletName] = useState('')
   const [pinTwo, setPinTwo] = useState('')
   const [modalState, setModalState] = useState<ModalState>({
     visible: false,
@@ -66,7 +69,20 @@ const PinCreate: React.FC<PinCreateProps> = ({ setAuthenticated }) => {
 
   const confirmEntry = async (x: string, y: string) => {
     const negativePattern = /[^0-9]/g
-    if (negativePattern.test(x)) {
+    const emailFormatPattern = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/
+    if (!walletName) {
+      setModalState({
+        visible: true,
+        title: 'Please provide your email',
+        message: 'We need your email to identify your wallet',
+      })
+    } else if (!emailFormatPattern.test(walletName)) {
+      setModalState({
+        visible: true,
+        title: 'Email is invalid',
+        message: 'Your email format is not correct',
+      })
+    } else if (negativePattern.test(x)) {
       setModalState({
         visible: true,
         title: t('PinCreate.InvalidPIN'),
@@ -109,6 +125,7 @@ const PinCreate: React.FC<PinCreateProps> = ({ setAuthenticated }) => {
         message: t('PinCreate.EnteredPINsDoNotMatch'),
       })
     } else {
+      await AsyncStorage.setItem('walletName', walletName)
       await passcodeCreate(x)
     }
   }
@@ -141,6 +158,7 @@ const PinCreate: React.FC<PinCreateProps> = ({ setAuthenticated }) => {
         testID={testIdWithKey('ReenterPIN')}
         accessibilityLabel={t('PinCreate.ReenterPIN')}
       />
+      <TextInput label="Please enter your email" onChangeText={setWalletName} />
 
       <Button
         title={t('PinCreate.CreatePIN')}

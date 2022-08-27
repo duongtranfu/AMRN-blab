@@ -1,9 +1,10 @@
 import { WalletError } from '@aries-framework/core'
 import { useAgent } from '@aries-framework/react-hooks'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { StackScreenProps } from '@react-navigation/stack'
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { StyleSheet, Text, TouchableOpacity, View, Keyboard } from 'react-native'
 import { getVersion, getBuildNumber } from 'react-native-device-info'
 import { pick, types } from 'react-native-document-picker'
 import { DocumentDirectoryPath, unlink } from 'react-native-fs'
@@ -11,7 +12,11 @@ import ShareDialog from 'react-native-share'
 import Toast from 'react-native-toast-message'
 import Icon from 'react-native-vector-icons/MaterialIcons'
 
+import Button, { ButtonType } from '../components/buttons/Button'
+import TextInput from '../components/inputs/TextInput'
+import { InfoBoxType } from '../components/misc/InfoBox'
 import LoadingModal from '../components/modals/LoadingModal'
+import PopupModal from '../components/modals/PopupModal'
 import { ToastType } from '../components/toast/BaseToast'
 import SafeAreaScrollView from '../components/views/SafeAreaScrollView'
 import { useTheme } from '../contexts/theme'
@@ -23,6 +28,9 @@ type SettingsProps = StackScreenProps<SettingStackParams>
 const Settings: React.FC<SettingsProps> = ({ navigation }) => {
   const { agent } = useAgent()
   const [loading, setLoading] = useState(false)
+  const [isUpdatingEmailDone, setIsUpdatingEmailDone] = useState(false)
+  const [walletname, setWalletName] = useState(agent?.config.label ?? '')
+  const [isPopupWalletNameOpen, setIsPopupWalletNameOpen] = useState(false)
   const { t } = useTranslation()
   const { borderRadius, SettingsTheme } = useTheme()
   const styles = StyleSheet.create({
@@ -43,6 +51,9 @@ const Settings: React.FC<SettingsProps> = ({ navigation }) => {
       alignItems: 'center',
       justifyContent: 'space-between',
       padding: 12,
+    },
+    popupWalletName: {
+      padding: 10,
     },
   })
 
@@ -134,6 +145,15 @@ const Settings: React.FC<SettingsProps> = ({ navigation }) => {
     }
   }
 
+  const handleClickWalletLabel = () => setIsPopupWalletNameOpen(!isPopupWalletNameOpen)
+
+  const handleUpdateWalletName = async () => {
+    if (!walletname) return
+    await AsyncStorage.setItem('walletName', walletname)
+    setIsUpdatingEmailDone(true)
+    setIsPopupWalletNameOpen(false)
+  }
+
   if (loading) return <LoadingModal isUsingBackgroundLogo={false} />
 
   return (
@@ -141,6 +161,39 @@ const Settings: React.FC<SettingsProps> = ({ navigation }) => {
       <View style={styles.container}>
         <Text style={styles.groupHeader}>{t('Settings.AppPreferences')}</Text>
         <View style={styles.rowGroup}>
+          <TouchableOpacity accessible={true} style={styles.row} onPress={handleClickWalletLabel}>
+            <Text style={SettingsTheme.text}>Wallet's name: {walletname}</Text>
+            <Icon name="edit" size={25} color={SettingsTheme.iconColor} />
+          </TouchableOpacity>
+
+          {isPopupWalletNameOpen && (
+            <View style={styles.popupWalletName}>
+              <TextInput
+                label="Please enter your email"
+                defaultValue={walletname}
+                value={walletname}
+                onChangeText={setWalletName}
+              />
+              <Button
+                buttonType={ButtonType.Primary}
+                title="Update"
+                onPress={() => {
+                  Keyboard.dismiss()
+                  handleUpdateWalletName()
+                }}
+              />
+            </View>
+          )}
+          {isUpdatingEmailDone && (
+            <PopupModal
+              notificationType={InfoBoxType.Info}
+              title="Updated wallet name"
+              bodyContent={
+                <Text style={{ color: '#fff' }}>You updated your wallet name, Please restart application</Text>
+              }
+              onClose={() => setIsUpdatingEmailDone(false)}
+            />
+          )}
           <TouchableOpacity
             accessible={true}
             accessibilityLabel={t('Settings.Language')}

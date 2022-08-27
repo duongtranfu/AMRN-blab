@@ -8,6 +8,7 @@ import {
   WsOutboundTransport,
 } from '@aries-framework/core'
 import { agentDependencies } from '@aries-framework/react-native'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { useNavigation } from '@react-navigation/core'
 import { createStackNavigator, StackNavigationProp } from '@react-navigation/stack'
 import React, { useEffect, useState } from 'react'
@@ -15,6 +16,7 @@ import { useTranslation } from 'react-i18next'
 import { Alert } from 'react-native'
 import { Config } from 'react-native-config'
 import Toast from 'react-native-toast-message'
+import uuid from 'react-native-uuid'
 
 import indyLedgers from '../../configs/ledgers/indy'
 import { ToastType } from '../components/toast/BaseToast'
@@ -91,9 +93,11 @@ const RootStack: React.FC<RootStackProps> = (props: RootStackProps) => {
         return
       }
 
+      const walletName = await AsyncStorage.getItem('walletName')
+
       const newAgent = new Agent(
         {
-          label: 'Aries Bifold',
+          label: walletName ?? uuid.v4().toString(),
           mediatorConnectionsInvite: Config.MEDIATOR_URL,
           mediatorPickupStrategy: MediatorPickupStrategy.Implicit,
           walletConfig: { id: credentials.walletId, key: credentials.walletKey },
@@ -106,7 +110,8 @@ const RootStack: React.FC<RootStackProps> = (props: RootStackProps) => {
         },
         agentDependencies
       )
-
+      // eslint-disable-next-line no-console
+      console.log('newAgent', newAgent)
       const wsTransport = new WsOutboundTransport()
       const httpTransport = new HttpOutboundTransport()
 
