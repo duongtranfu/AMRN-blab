@@ -25,6 +25,7 @@ interface BifoldErrorProps {
   bodyContent?: Element
   message?: string
   onCallToActionPressed?: GenericFn
+  onClose?: GenericFn
   onCallToActionLabel?: string
 }
 
@@ -36,6 +37,7 @@ const InfoBox: React.FC<BifoldErrorProps> = ({
   message,
   onCallToActionPressed,
   onCallToActionLabel,
+  onClose,
 }) => {
   const { t } = useTranslation()
   const { TextTheme, ColorPallet } = useTheme()
@@ -81,6 +83,9 @@ const InfoBox: React.FC<BifoldErrorProps> = ({
       ...TextTheme.title,
       fontWeight: 'normal',
       color: ColorPallet.brand.link,
+    },
+    button: {
+      marginTop: 10,
     },
   })
   let iconName = 'info'
@@ -203,9 +208,12 @@ const InfoBox: React.FC<BifoldErrorProps> = ({
             accessibilityLabel={onCallToActionLabel || t('Global.Okay')}
             testID={testIdWithKey('Okay')}
             buttonType={ButtonType.Primary}
-            onPress={onCallToActionPressed}
+            onPress={() => {
+              onCallToActionPressed()
+            }}
           />
         )}
+        {onClose && <Button title="Close" buttonType={ButtonType.Secondary} onPress={onClose} />}
       </View>
     </View>
   )

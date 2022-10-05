@@ -59,6 +59,7 @@ export const wipeWalletKey = async (useBiometrics: boolean) => {
 }
 
 export const storeWalletKey = async (secret: WalletKey, useBiometrics = false): Promise<boolean> => {
+  debugger
   const opts = optionsForKeychainAccess(KeychainServices.Key, useBiometrics)
   const secretAsString = JSON.stringify(secret)
   await wipeWalletKey(useBiometrics)
@@ -74,26 +75,35 @@ export const storeWalletSalt = async (secret: WalletSalt): Promise<boolean> => {
 }
 
 export const storeWalletSecret = async (secret: WalletSecret, useBiometrics = false): Promise<boolean> => {
-  let keyResult = false
-  if (secret.key) {
-    keyResult = await storeWalletKey({ key: secret.key }, useBiometrics)
+  try {
+    debugger
+    let keyResult = false
+    if (secret.key) {
+      keyResult = await storeWalletKey({ key: secret.key }, useBiometrics)
+    }
+
+    const saltResult = await storeWalletSalt({ id: secret.id, salt: secret.salt })
+
+    return keyResult && saltResult
+  } catch (error) {
+    console.log('ERROR', error)
   }
-
-  const saltResult = await storeWalletSalt({ id: secret.id, salt: secret.salt })
-
-  return keyResult && saltResult
 }
 
 export const loadWalletSalt = async (): Promise<WalletSalt | undefined> => {
-  const opts: Keychain.Options = {
-    service: KeychainServices.Salt,
-  }
-  const result = await Keychain.getGenericPassword(opts)
-  if (!result) {
-    return
-  }
+  try {
+    const opts: Keychain.Options = {
+      service: KeychainServices.Salt,
+    }
+    const result = await Keychain.getGenericPassword(opts).catch(err => console.log('catch ERROR', err))
+    if (!result) {
+      return
+    }
 
-  return JSON.parse(result.password) as WalletSalt
+    return JSON.parse(result.password) as WalletSalt
+  } catch (error) {
+    console.log('ERROR', error)
+  }
 }
 
 export const loadWalletKey = async (title?: string, description?: string): Promise<WalletKey | undefined> => {
@@ -120,7 +130,9 @@ export const loadWalletKey = async (title?: string, description?: string): Promi
 }
 
 export const loadWalletSecret = async (title?: string, description?: string): Promise<WalletSecret | undefined> => {
+  debugger
   const salt = await loadWalletSalt()
+  debugger
   const key = await loadWalletKey(title, description)
 
   return { ...salt, ...key } as WalletSecret
